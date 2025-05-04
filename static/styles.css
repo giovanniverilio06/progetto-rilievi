@@ -1,0 +1,548 @@
+/* Main styles for admin dashboard */
+body {
+  font-family: 'Lato', sans-serif;
+  background-color: #f8f9fa;
+}
+
+.sidebar {
+  position: fixed;
+  top: 60px !important; /* Aggiornato per adattarsi alla navbar */
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  padding: 48px 0 0;
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar-sticky {
+  position: relative;
+  top: 0;
+  height: calc(100vh - 48px);
+  padding-top: .5rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.sidebar .nav-link {
+  font-weight: 500;
+  color: #333;
+}
+
+.sidebar .nav-link.active {
+  color: #2470dc;
+}
+
+.sidebar .nav-link:hover {
+  color: #007bff;
+}
+
+.sidebar-heading {
+  font-size: .75rem;
+  text-transform: uppercase;
+}
+
+/* Stile aggiuntivo per l'avatar circle */
+.avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* Barra laterale */
+#sidebar {
+  height: 100vh;
+  position: fixed;
+  top: 60px; /* Aggiustato per la navbar */
+  left: 0;
+  z-index: 1;
+}
+
+/* Contenuto principale con margine per la sidebar */
+main {
+  margin-left: 240px; /* Larghezza della sidebar */
+  padding-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  #sidebar {
+    position: static;
+    height: auto;
+  }
+  main {
+    margin-left: 0;
+  }
+}
+
+.nav-link {
+  color: #343a40;
+  border-radius: 0;
+  padding: 0.75rem 1.25rem;
+}
+
+.nav-link.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.nav-link:hover:not(.active) {
+  background-color: #f8f9fa;
+}
+
+/* Map styles */
+.leaflet-popup-content {
+  min-width: 200px;
+}
+
+/* Photo gallery styles */
+.photo-item {
+  margin-bottom: 15px;
+}
+
+.photo-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.photo-container img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.photo-container:hover img {
+  transform: scale(1.05);
+}
+
+.photo-caption {
+  margin-top: 5px;
+}
+
+.photo-caption textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 40px;
+}
+
+/* Card hover effects */
+.card {
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Table styling */
+.table th {
+  background-color: #f2f2f2;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Button and icon styling */
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+
+.fa-shield-alt {
+  color: #ffc107;
+}
+
+/* Modal styling */
+.modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+}
+
+/* Stats cards */
+.card-title {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.card-text.display-6 {
+  font-size: 2.5rem;
+  font-weight: 300;
+}
+
+/* Responsive design adjustments */
+@media (max-width: 767.98px) {
+  .sidebar {
+    position: static;
+    height: auto;
+    padding-top: 0;
+  }
+  
+  .photo-container img {
+    height: 150px;
+  }
+  
+  #sidebar {
+    position: static;
+    height: auto;
+  }
+  
+  .container-fluid {
+    min-height: auto;
+  }
+  
+  footer.footer {
+    position: static;
+  }
+}
+
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  background-color: #f8f9fa;
+}
+
+.toggle-password {
+  cursor: pointer;
+}
+
+.password-strength {
+  height: 5px;
+  margin-top: 10px;
+  border-radius: 3px;
+  background-color: #e9ecef;
+}
+
+.strength-weak { width: 33%; height: 100%; background-color: #dc3545; border-radius: 3px; }
+.strength-medium { width: 66%; height: 100%; background-color: #ffc107; border-radius: 3px; }
+.strength-strong { width: 100%; height: 100%; background-color: #28a745; border-radius: 3px; }
+
+footer.footer {
+  position: relative;
+  margin-top: 2rem;
+  z-index: 100; /* Assicura che il footer sia sopra altri elementi */
+  clear: both;
+}
+
+/* Stile per il contenuto principale */
+main.col-md-9 {
+  padding-bottom: 3rem; /* Spazio per il footer */
+}
+
+/* Stile per le card */
+.card-header {
+  border-bottom: 1px solid rgba(0,0,0,.125);
+  background-color: rgba(0,0,0,.03);
+}
+
+/* Stili per la tabella perizie */
+#perizieTable th, #perizieTable td {
+  vertical-align: middle;
+}
+
+/* Miglioramento spaziatura generale */
+main.container-fluid {
+  padding-top: 1rem;
+}
+
+.operator-card {
+  transition: all 0.3s;
+}
+
+.operator-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+#operatori-cards .card {
+  transition: all 0.2s ease;
+}
+
+#operatori-cards .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Stili per le card degli operatori basati sullo stato */
+.operator-card-available {
+  background-color: rgba(40, 167, 69, 0.05); /* Verde chiaro per operatore disponibile */
+  border-left: 4px solid #28a745;
+}
+
+.operator-card-busy {
+  background-color: rgba(220, 53, 69, 0.05); /* Rosso chiaro per operatore occupato */
+  border-left: 4px solid #dc3545;
+}
+
+/* Hover effects per le card */
+.operator-card-available:hover {
+  box-shadow: 0 0.5rem 1rem rgba(40, 167, 69, 0.15) !important;
+}
+
+.operator-card-busy:hover {
+  box-shadow: 0 0.5rem 1rem rgba(220, 53, 69, 0.15) !important;
+}
+
+/* Miglioramenti visivi per i badge di stato */
+.badge.bg-success, .badge.bg-danger {
+  font-size: 0.75rem;
+  font-weight: normal;
+  padding: 0.25em 0.6em;
+}
+
+/* Stile per perizie non assegnabili/disabilitate */
+.inspection-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.filter-container {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 0.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e9ecef;
+}
+
+.filter-container .form-label {
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+/* Badge per lo stato delle perizie */
+.badge.bg-secondary {
+  background-color: #6c757d !important;
+}
+
+.badge.bg-warning {
+  background-color: #ffc107 !important;
+  color: #212529 !important;
+}
+
+/* Stili per le tabelle nella dashboard */
+.dashboard-table th {
+  white-space: nowrap;
+}
+
+/* Stile per evidenziare le "Nuove Perizie" */
+.card-header h5.new-inspections, 
+.card-header .h5.new-inspections {
+  position: relative;
+}
+
+.card-header h5.new-inspections::after, 
+.card-header .h5.new-inspections::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 80px;
+  height: 2px;
+  background-color: #28a745;
+}
+
+.add-operator-card {
+  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+  min-height: 220px;
+}
+
+.add-operator-card:hover {
+  transform: translateY(-5px);
+  border-color: #28a745 !important;
+  background-color: #e8f5e9;
+}
+
+.add-operator-icon {
+  transition: all 0.3s ease;
+}
+
+.add-operator-card:hover .add-operator-icon {
+  transform: scale(1.2);
+}
+
+/* Migliora la visualizzazione delle iniziali nell'avatar */
+.avatar-circle #userInitials, 
+.avatar-circle span {
+  font-size: 16px !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+/* Gestione responsive degli avatar */
+@media (max-width: 768px) {
+  .avatar-circle {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .avatar-circle #userInitials, 
+  .avatar-circle span {
+    font-size: 14px;
+  }
+}
+
+/* Avatar speciale per card operatore */
+.operator-card .avatar-circle {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 10px;
+}
+
+.operator-card .avatar-circle #userInitials, 
+.operator-card .avatar-circle span {
+  font-size: 18px;
+}
+
+/* Stili per i bottoni della navbar */
+.navbar {
+  background-color: #212529 !important;
+  padding: 0 !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.navbar-nav {
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* Stile base dei link nella navbar */
+.navbar .nav-link {
+  position: relative;
+  margin: 0 4px;
+  padding: 15px 20px !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 500;
+  font-size: 0.9rem;
+  letter-spacing: 0.3px;
+  border-radius: 6px;
+  transition: all 0.25s ease;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Effetto hover sui link */
+.navbar .nav-link:hover {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+/* Link attivo nella navbar */
+.navbar .nav-link.active {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.25);
+}
+
+/* Effetto hover sul link attivo */
+.navbar .nav-link.active:hover {
+  background: linear-gradient(135deg, #0069d9, #004494);
+}
+
+/* Effetto di pulsazione per indicare dove si trova l'utente */
+.navbar .nav-link.active::after {
+  content: "";
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+/* Stile per icone nei link - da usare con Font Awesome */
+.navbar .nav-link i {
+  margin-right: 8px;
+  font-size: 1rem;
+  vertical-align: middle;
+}
+
+/* Animazione sottile quando si fa hover */
+.navbar .nav-link::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+.navbar .nav-link:hover::before {
+  left: 0;
+}
+
+/* Spazio per badge o notifiche */
+.navbar .nav-link .badge {
+  position: absolute;
+  top: 10px;
+  right: 8px;
+  font-size: 0.65rem;
+  padding: 0.15rem 0.35rem;
+  border-radius: 10px;
+}
+
+/* Responsive styles */
+@media (max-width: 991.98px) {
+  .navbar .nav-link {
+    padding: 12px 15px !important;
+    margin: 4px !important;
+  }
+  
+  .navbar .nav-link.active {
+    border-radius: 4px;
+  }
+  
+  .navbar .nav-link.active::after {
+    display: none;
+  }
+}
+
+/* Stile per il toggle button */
+.navbar-toggler {
+  border: none !important;
+  padding: 10px !important;
+  transition: all 0.2s;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 5px !important;
+}
+
+.navbar-toggler:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25) !important;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255, 255, 255, 0.8)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") !important;
+}

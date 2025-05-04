@@ -1,0 +1,380 @@
+[
+  
+    {
+      "id": "PRZ-2025-001",
+      "operatoreId": "mrossi",
+      "operatore": "Marco Rossi",
+      "data": "2025-04-24T10:30:00",
+      "tipo": "incendio",
+      "posizione": {
+        "indirizzo": "Milano, Via Roma 123",
+        "lat": 45.4642,
+        "lng": 9.1900
+      },
+      "descrizione": "Danni da incendio nel piano superiore dell'abitazione. Soffitto e pareti danneggiate, impianto elettrico compromesso.",
+      "cliente": {
+        "nome": "Roberto Bianchi",
+        "contatto": "3391234567"
+      },
+      "polizza": "POL-123456",
+      "priorita": "high",
+      "stato": "completed",
+      "fotografie": [
+        {
+          "id": "FOTO-001-001",
+          "url": "https://example.com/photos/incendio001_1.jpg",
+          "timestamp": "2025-04-24T10:35:12",
+          "commento": "Ingresso dell'abitazione con segni evidenti di fumo"
+        },
+        {
+          "id": "FOTO-001-002",
+          "url": "https://example.com/photos/incendio001_2.jpg",
+          "timestamp": "2025-04-24T10:37:45",
+          "commento": "Cucina con danni strutturali al soffitto"
+        },
+        {
+          "id": "FOTO-001-003",
+          "url": "https://example.com/photos/incendio001_3.jpg",
+          "timestamp": "2025-04-24T10:40:22",
+          "commento": "Impianto elettrico danneggiato nella zona living"
+        },
+        {
+          "id": "FOTO-001-004",
+          "url": "https://example.com/photos/incendio001_4.jpg",
+          "timestamp": "2025-04-24T10:42:18",
+          "commento": "Punto di origine dell'incendio (presa elettrica difettosa)"
+        },
+        {
+          "id": "FOTO-001-005",
+          "url": "https://example.com/photos/incendio001_5.jpg",
+          "timestamp": "2025-04-24T10:45:33",
+          "commento": "Danni ai mobili in soggiorno"
+        },
+        {
+          "id": "FOTO-001-006",
+          "url": "https://example.com/photos/incendio001_6.jpg",
+          "timestamp": "2025-04-24T10:47:55",
+          "commento": "Condizioni delle pareti nel corridoio principale"
+        },
+        {
+          "id": "FOTO-001-007",
+          "url": "https://example.com/photos/incendio001_7.jpg",
+          "timestamp": "2025-04-24T10:50:10",
+          "commento": "Dettaglio degli arredi danneggiati"
+        },
+        {
+          "id": "FOTO-001-008",
+          "url": "https://example.com/photos/incendio001_8.jpg",
+          "timestamp": "2025-04-24T10:52:25",
+          "commento": "Visuale dall'esterno con danni visibili dalla finestra"
+        }
+      ],
+      "ultimoAggiornamento": "2025-04-24T15:45:00"
+    },
+    {
+      "id": "PRZ-2025-002",
+      "operatoreId": "lbianchi",
+      "operatore": "Laura Bianchi",
+      "data": "2025-04-23T14:15:00",
+      "tipo": "allagamento",
+      "posizione": {
+        "indirizzo": "Roma, Via Nazionale 45",
+        "lat": 41.9028,
+        "lng": 12.4964
+      },
+      "descrizione": "Allagamento piano terra causato da rottura tubature. Pavimenti e mobili danneggiati, muri da verificare per umidità.",
+      "cliente": {
+        "nome": "Giuseppe Verdi",
+        "contatto": "3471234567"
+      },
+      "polizza": "POL-234567",
+      "priorita": "medium",
+      "stato": "in_progress",
+      "fotografie": [
+        {
+          "id": "FOTO-002-001",
+          "url": "https://example.com/photos/allagamento002_1.jpg",
+          "timestamp": "2025-04-23T14:20:05",
+          "commento": "Ingresso allagato con evidenti segni di acqua stagnante"
+        },
+        {
+          "id": "FOTO-002-002",
+          "url": "https://example.com/photos/allagamento002_2.jpg",
+          "timestamp": "2025-04-23T14:25:18",
+          "commento": "Tubatura rotta nel bagno principale"
+        },
+        {
+          "id": "FOTO-002-003",
+          "url": "https://example.com/photos/allagamento002_3.jpg",
+          "timestamp": "2025-04-23T14:30:45",
+          "commento": "Danni a pavimento in parquet del soggiorno"
+        }
+      ],
+      "ultimoAggiornamento": "2025-04-24T09:30:00"
+    },
+    {
+      "id": "PRZ-2025-003",
+      "operatoreId": "gverdi",
+      "operatore": "Giovanni Verdi",
+      "data": "2025-04-25T09:00:00",
+      "tipo": "grandine",
+      "posizione": {
+        "indirizzo": "Napoli, Piazza del Plebiscito 1",
+        "lat": 40.8518,
+        "lng": 14.2681
+      },
+      "descrizione": "Danni da grandine sul tetto e vetri rotti. Da verificare anche possibili infiltrazioni.",
+      "cliente": {
+        "nome": "Anna Esposito",
+        "contatto": "3661234567"
+      },
+      "polizza": "POL-345678",
+      "priorita": "low",
+      "stato": "scheduled",
+      "fotografie": [],
+      "ultimoAggiornamento": "2025-04-23T16:00:00"
+    },
+    {
+      "id": "PRZ-2025-004",
+      "operatoreId": "pneri",
+      "operatore": "Paolo Neri",
+      "data": "2025-04-24T16:30:00",
+      "tipo": "furto",
+      "posizione": {
+        "indirizzo": "Firenze, Viale dei Colli 12",
+        "lat": 43.7696,
+        "lng": 11.2558
+      },
+      "descrizione": "Furto con scasso. Danneggiati porta d'ingresso, finestre e mobili. Da valutare beni mancanti.",
+      "cliente": {
+        "nome": "Maria Rossi",
+        "contatto": "3481234567"
+      },
+      "polizza": "POL-456789",
+      "priorita": "high",
+      "stato": "in_progress",
+      "fotografie": [
+        {
+          "id": "FOTO-004-001",
+          "url": "https://example.com/photos/furto004_1.jpg",
+          "timestamp": "2025-04-24T16:35:12",
+          "commento": "Porta d'ingresso con segni di scasso"
+        },
+        {
+          "id": "FOTO-004-002",
+          "url": "https://example.com/photos/furto004_2.jpg",
+          "timestamp": "2025-04-24T16:37:55",
+          "commento": "Finestra forzata nel soggiorno"
+        },
+        {
+          "id": "FOTO-004-003",
+          "url": "https://example.com/photos/furto004_3.jpg",
+          "timestamp": "2025-04-24T16:40:22",
+          "commento": "Armadio in camera da letto scassinato"
+        },
+        {
+          "id": "FOTO-004-004",
+          "url": "https://example.com/photos/furto004_4.jpg",
+          "timestamp": "2025-04-24T16:42:18",
+          "commento": "Cassaforte danneggiata"
+        },
+        {
+          "id": "FOTO-004-005",
+          "url": "https://example.com/photos/furto004_5.jpg",
+          "timestamp": "2025-04-24T16:45:33",
+          "commento": "Segni sul pavimento lasciati dagli intrusi"
+        }
+      ],
+      "ultimoAggiornamento": "2025-04-24T17:15:00"
+    },
+    {
+      "id": "PRZ-2025-005",
+      "operatoreId": "cverdi",
+      "operatore": "Claudia Verdi",
+      "data": "2025-04-25T11:45:00",
+      "tipo": "allagamento",
+      "posizione": {
+        "indirizzo": "Torino, Corso Francia 78",
+        "lat": 45.0703,
+        "lng": 7.6869
+      },
+      "descrizione": "Allagamento cantina condominiale. Da valutare danni strutturali e alle cantine private.",
+      "cliente": {
+        "nome": "Luigi Ferrara",
+        "contatto": "3491234567"
+      },
+      "polizza": "POL-567890",
+      "priorita": "medium",
+      "stato": "pending",
+      "fotografie": [
+        {
+          "id": "FOTO-005-001",
+          "url": "https://example.com/photos/allagamento005_1.jpg",
+          "timestamp": "2025-04-25T11:50:15",
+          "commento": "Accesso alla cantina allagata"
+        },
+        {
+          "id": "FOTO-005-002",
+          "url": "https://example.com/photos/allagamento005_2.jpg",
+          "timestamp": "2025-04-25T11:55:22",
+          "commento": "Tubatura danneggiata che ha causato la perdita"
+        }
+      ],
+      "ultimoAggiornamento": "2025-04-24T18:30:00"
+    },
+    {
+      "id": "PRZ-2025-006",
+      "operatoreId": null,
+      "operatore": null,
+      "data": "2025-04-28T10:00:00",
+      "tipo": "incendio",
+      "posizione": {
+        "indirizzo": "Milano, Via Montenapoleone 8",
+        "lat": 45.4685,
+        "lng": 9.1957
+      },
+      "descrizione": "Incendio in un negozio al piano terra. Da valutare danni strutturali e ai beni in vendita.",
+      "cliente": {
+        "nome": "Fashion Store SRL",
+        "contatto": "3501234567"
+      },
+      "polizza": "POL-678901",
+      "priorita": "high",
+      "stato": "scheduled",
+      "fotografie": [],
+      "ultimoAggiornamento": "2025-04-25T09:15:00"
+    },
+    {
+      "id": "PRZ-2025-007",
+      "operatoreId": null,
+      "operatore": null,
+      "data": "2025-04-29T14:30:00",
+      "tipo": "grandine",
+      "posizione": {
+        "indirizzo": "Bologna, Via dell'Indipendenza 23",
+        "lat": 44.4949,
+        "lng": 11.3426
+      },
+      "descrizione": "Danni da grandine su tetto e finestre di un edificio storico. Possibili infiltrazioni.",
+      "cliente": {
+        "nome": "Comune di Bologna",
+        "contatto": "3512345678"
+      },
+      "polizza": "POL-789012",
+      "priorita": "medium",
+      "stato": "scheduled",
+      "fotografie": [],
+      "ultimoAggiornamento": "2025-04-25T10:20:00"
+    },
+    {
+      "id": "PRZ-2025-008",
+      "operatoreId": null,
+      "operatore": null,
+      "data": "2025-04-30T09:15:00",
+      "tipo": "allagamento",
+      "posizione": {
+        "indirizzo": "Venezia, Fondamenta Nuove 15",
+        "lat": 45.4408,
+        "lng": 12.3374
+      },
+      "descrizione": "Allagamento piano terra e danni da acqua salata a pareti e impianti.",
+      "cliente": {
+        "nome": "Hotel Laguna",
+        "contatto": "3523456789"
+      },
+      "polizza": "POL-890123",
+      "priorita": "high",
+      "stato": "pending",
+      "fotografie": [],
+      "ultimoAggiornamento": "2025-04-25T11:30:00"
+    },
+    {
+      "id": "PRZ-2025-009",
+      "operatoreId": null,
+      "operatore": null,
+      "data": "2025-05-02T15:00:00",
+      "tipo": "furto",
+      "posizione": {
+        "indirizzo": "Palermo, Via Libertà 47",
+        "lat": 38.1157,
+        "lng": 13.3615
+
+      },
+      "descrizione": "Furto con effrazione in un appartamento. Danni alla porta blindata e finestre.",
+      "cliente": {
+        "nome": "Antonio Russo",
+        "contatto": "3534567890"
+      },
+      "polizza": "POL-901234",
+      "priorita": "medium",
+      "stato": "scheduled",
+      "fotografie": [],
+      "ultimoAggiornamento": "2025-04-25T14:45:00"
+    },
+    {
+      "id": "PRZ-2025-010",
+      "operatoreId": null,
+      "operatore": null,
+      "data": "2025-05-03T11:30:00",
+      "tipo": "altro",
+      "posizione": {
+        "indirizzo": "Bari, Lungomare Nazario Sauro 30",
+        "lat": 41.1260,
+        "lng": 16.8730
+      },
+      "descrizione": "Danni strutturali a seguito di forte vento. Cedimento di una parte del tetto.",
+      "cliente": {
+        "nome": "Ristorante Mare Blu",
+        "contatto": "3545678901"
+      },
+      "polizza": "POL-012345",
+      "priorita": "high",
+      "stato": "scheduled",
+      "fotografie": [],
+      "ultimoAggiornamento": "2025-04-25T16:10:00"
+    },
+    {
+      "id": "PRZ-2025-011",
+      "operatoreId": null,
+      "operatore": null,
+      "data": "2025-05-04T10:00:00",
+      "tipo": "incendio",
+      "posizione": {
+        "indirizzo": "Verona, Via Mazzini 15",
+        "lat": 45.4384,
+        "lng": 10.9916
+      },
+      "descrizione": "Principio d'incendio in un magazzino. Danni limitati ma fumo diffuso.",
+      "cliente": {
+        "nome": "Fashion Retail SPA",
+        "contatto": "3556789012"
+      },
+      "polizza": "POL-123456",
+      "priorita": "medium",
+      "stato": "scheduled",
+      "fotografie": [],
+      "ultimoAggiornamento": "2025-04-25T17:30:00"
+    },
+    {
+      "id": "PRZ-2025-012",
+      "operatoreId": null,
+      "operatore": null,
+      "data": "2025-05-05T14:00:00",
+      "tipo": "allagamento",
+      "posizione": {
+        "indirizzo": "Cagliari, Via Roma 78",
+        "lat": 39.2169,
+        "lng": 9.1129
+      },
+      "descrizione": "Allagamento a seguito di rottura dell'impianto idrico. Danni al pavimento e ai muri.",
+      "cliente": {
+        "nome": "Studio Legale Associato",
+        "contatto": "3567890123"
+      },
+      "polizza": "POL-234567",
+      "priorita": "low",
+      "stato": "scheduled",
+      "fotografie": [],
+      "ultimoAggiornamento": "2025-04-26T09:20:00"
+    }
+]
