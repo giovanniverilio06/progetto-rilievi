@@ -1,5 +1,6 @@
 "use strict";
 import { Express } from "express";
+import cors, { CorsOptions } from "cors";
 import http from "http";
 import fs from "fs";
 import express, { Application, NextFunction, Request, Response } from "express";
@@ -35,27 +36,26 @@ function init() {
 
 
 /* ********************** Middleware ********************** */
-import cors from 'cors';
-app.use(cors({
-  origin: '*',
-  
-}));
-
-app.options('*', cors());
-
-app.use(express.json());
-
-// Le tue rotte
-app.get('/api', (req, res) => {
-  res.json({ message: 'Ciao dal backend!' });
-});
-
-// Avvio server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server in ascolto sulla porta ${PORT}`);
-});
-
+const whitelist = [
+  'http://localhost:3000',
+  // 'https://localhost:3001',
+  'http://localhost:4200', // server angular
+  'https://cordovaapp' // porta 443 (default)
+];
+const corsOptions: CorsOptions = {
+  origin: function (origin, callback) {
+    if (!origin)
+      // browser direct call
+      return callback(null, true);
+      return true;
+    // if (whitelist.indexOf(origin) === -1) {
+    //   var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+    //   return callback(new Error(msg), false);
+    // } else return callback(null, true);
+  },
+  credentials: true
+};
+app.use('/', cors(corsOptions));
 
 // 1. Request log
 app.use("/", (req: Request, res: Response, next: NextFunction) => {
