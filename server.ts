@@ -38,8 +38,10 @@ function init() {
 import cors from 'cors';
 app.use(cors({
   origin: '*',
-  credentials: true // oppure '*' per tutte le origini (solo per testing)
+  
 }));
+
+app.options('*', cors());
 
 app.use(express.json());
 
