@@ -40,7 +40,7 @@ const whitelist = [
   'http://localhost:3000',
   // 'https://localhost:3001',
   'http://localhost:4200', // server angular
-  'https://cordovaapp' // porta 443 (default)
+  'https://cordovaapp', // porta 443 (default)
   'https://localhost:8100', // porta 8100 (default)
 ];
 const corsOptions: CorsOptions = {
