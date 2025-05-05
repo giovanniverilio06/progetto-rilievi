@@ -116,7 +116,7 @@ app.get("/api/getCollections", (req, res, next) => __awaiter(void 0, void 0, voi
         client.close();
     });
 }));
-app.post("/api/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get("/api/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const username = req.query.username;
     const password = req.query.password;
     if (!username || !password) {
