@@ -1,5 +1,4 @@
 "use strict";
-
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -24,6 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const cors_1 = __importDefault(require("cors"));
 const http_1 = __importDefault(require("http"));
 const fs_1 = __importDefault(require("fs"));
 const express_1 = __importDefault(require("express"));
@@ -54,6 +54,32 @@ function init() {
     });
 }
 /* ********************** Middleware ********************** */
+app.use(function (req, res, next) {
+    res.setHeader('Allow', 'OPTIONS, HEAD, GET, POST, PUT, PATCH, DELETE');
+    next();
+});
+const whitelist = [
+    'http://localhost:3000',
+    // 'https://localhost:3001',
+    'http://localhost:4200',
+    'https://cordovaapp',
+    'http://localhost:8100', // porta 8100 (default)
+];
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (!origin)
+            // browser direct call
+            return callback(null, true);
+        if (whitelist.indexOf(origin) === -1) {
+            var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        else
+            return callback(null, true);
+    },
+    credentials: true
+};
+app.use('/', (0, cors_1.default)(corsOptions));
 // 1. Request log
 app.use("/", (req, res, next) => {
     console.log(req.method + ": " + req.originalUrl);
@@ -90,7 +116,7 @@ app.get("/api/getCollections", (req, res, next) => __awaiter(void 0, void 0, voi
         client.close();
     });
 }));
-app.get("/api/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post("/api/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const username = req.query.username;
     const password = req.query.password;
     if (!username || !password) {

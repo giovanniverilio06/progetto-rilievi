@@ -106,7 +106,7 @@ app.get(
   }
 );
 
-app.get("/api/login", async (req: Request, res: Response) => {
+app.post("/api/login", async (req: Request, res: Response) => {
   const username = req.query.username as string | undefined;
   const password = req.query.password as string | undefined;
 
