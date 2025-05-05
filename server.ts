@@ -41,17 +41,17 @@ const whitelist = [
   // 'https://localhost:3001',
   'http://localhost:4200', // server angular
   'https://cordovaapp' // porta 443 (default)
+  'https://localhost:8100', // porta 8100 (default)
 ];
 const corsOptions: CorsOptions = {
   origin: function (origin, callback) {
     if (!origin)
       // browser direct call
       return callback(null, true);
-      return true;
-    // if (whitelist.indexOf(origin) === -1) {
-    //   var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-    //   return callback(new Error(msg), false);
-    // } else return callback(null, true);
+    if (whitelist.indexOf(origin) === -1) {
+      var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    } else return callback(null, true);
   },
   credentials: true
 };
