@@ -1,5 +1,5 @@
 "use strict";
-
+import { Express } from "express";
 import http from "http";
 import fs from "fs";
 import express, { Application, NextFunction, Request, Response } from "express";
@@ -33,11 +33,28 @@ function init() {
   });
 }
 
-const cors = require('cors');
-app.use(cors({
-  origin: 'http://localhost:8100', // oppure '*' per tutte le origini (solo per testing)
-}));
+
 /* ********************** Middleware ********************** */
+import cors from 'cors';
+app.use(cors({
+  origin: '*',
+  credentials: true // oppure '*' per tutte le origini (solo per testing)
+}));
+
+app.use(express.json());
+
+// Le tue rotte
+app.get('/api', (req, res) => {
+  res.json({ message: 'Ciao dal backend!' });
+});
+
+// Avvio server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server in ascolto sulla porta ${PORT}`);
+});
+
+
 // 1. Request log
 app.use("/", (req: Request, res: Response, next: NextFunction) => {
   console.log(req.method + ": " + req.originalUrl);
