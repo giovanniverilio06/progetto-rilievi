@@ -32,6 +32,11 @@ function init() {
     }
   });
 }
+
+const cors = require('cors');
+app.use(cors({
+  origin: 'http://localhost:8100', // oppure '*' per tutte le origini (solo per testing)
+}));
 /* ********************** Middleware ********************** */
 // 1. Request log
 app.use("/", (req: Request, res: Response, next: NextFunction) => {
