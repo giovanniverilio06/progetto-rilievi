@@ -37,7 +37,7 @@ function init() {
 
 /* ********************** Middleware ********************** */
 app.use(function(req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8100')
   next();
 });
 const whitelist = [
