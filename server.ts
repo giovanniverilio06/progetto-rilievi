@@ -688,3 +688,64 @@ app.delete("/api/users/:id", async (req: Request, res: Response) => {
     await client.close();
   }
 });
+
+
+// POST endpoint to create a new perizia
+app.post("/api/perizie", async (req: Request, res: Response) => {
+  const periziaData = req.body;
+  
+  // Validate required fields
+  if (!periziaData || !periziaData.tipo || !periziaData.descrizione || 
+      !periziaData.posizione || !periziaData.cliente || !periziaData.polizza) {
+    return res.status(400).json({
+      success: false,
+      message: "Dati perizia insufficienti, i campi tipo, descrizione, posizione, cliente e polizza sono obbligatori"
+    });
+  }
+  
+  const client = new MongoClient(connectionString);
+  
+  try {
+    await client.connect();
+    const db = client.db(DB_NAME);
+    const perizieCollection = db.collection("Perizie");
+    
+    // Generate a unique ID if not provided
+    if (!periziaData.id) {
+      // Get current count to generate a sequential ID
+      const count = await perizieCollection.countDocuments();
+      const year = new Date().getFullYear();
+      periziaData.id = `PRZ-${year}-${(count + 1).toString().padStart(3, '0')}`;
+    }
+    
+    // Add default values for missing fields
+    const newPerizia = {
+      ...periziaData,
+      data: periziaData.data || new Date().toISOString(),
+      stato: periziaData.stato || "pending",
+      ultimoAggiornamento: new Date().toISOString(),
+      fotografie: periziaData.fotografie || []
+    };
+    
+    // Insert the new perizia
+    const result = await perizieCollection.insertOne(newPerizia);
+    
+    if (result.acknowledged) {
+      res.status(201).json({
+        success: true,
+        message: "Perizia creata con successo",
+        data: newPerizia
+      });
+    } else {
+      throw new Error("Errore nell'inserimento della perizia");
+    }
+  } catch (error) {
+    console.error("Errore nella creazione della perizia:", error);
+    res.status(500).json({
+      success: false,
+      message: `Errore nella creazione della perizia: ${error}`
+    });
+  } finally {
+    await client.close();
+  }
+});
