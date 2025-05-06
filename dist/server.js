@@ -512,6 +512,8 @@ app.post("/api/users", (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 }));
 // API per aggiornare un utente esistente
+// Fix the user update endpoint
+// Fix for the user update endpoint (around line 609)
 app.patch("/api/users/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.params.id;
     const updateData = req.body;
@@ -521,7 +523,7 @@ app.patch("/api/users/:id", (req, res) => __awaiter(void 0, void 0, void 0, func
             message: "ID utente mancante"
         });
     }
-    // Rimuovi campi che non possono essere modificati direttamente
+    // Remove fields that shouldn't be modified directly
     if (updateData.password)
         delete updateData.password;
     if (updateData._id)
@@ -531,8 +533,12 @@ app.patch("/api/users/:id", (req, res) => __awaiter(void 0, void 0, void 0, func
         yield client.connect();
         const db = client.db(DB_NAME);
         const usersCollection = db.collection("Users");
-        // Aggiorna l'utente
-        const result = yield usersCollection.updateOne({ _id: userId }, { $set: updateData });
+        let query = { username: userId }; // Default to searching by username
+        // Only try to use ObjectId if it's in the correct format
+        if (/^[0-9a-fA-F]{24}$/.test(userId)) {
+            query = { _id: new mongodb_1.ObjectId(userId) };
+        }
+        const result = yield usersCollection.updateOne(query, { $set: updateData });
         if (result.matchedCount === 0) {
             return res.status(404).json({
                 success: false,
@@ -555,7 +561,8 @@ app.patch("/api/users/:id", (req, res) => __awaiter(void 0, void 0, void 0, func
         yield client.close();
     }
 }));
-// API per eliminare un utente
+// Fix the user delete endpoint
+// Fix the user delete endpoint
 app.delete("/api/users/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.params.id;
     if (!userId) {
@@ -569,8 +576,13 @@ app.delete("/api/users/:id", (req, res) => __awaiter(void 0, void 0, void 0, fun
         yield client.connect();
         const db = client.db(DB_NAME);
         const usersCollection = db.collection("Users");
-        // Verifica se l'utente esiste e non è l'ultimo admin
-        const user = yield usersCollection.findOne({ _id: userId });
+        let query = { username: userId }; // Default to username
+        // Only try to use ObjectId if it's in the correct format
+        if (/^[0-9a-fA-F]{24}$/.test(userId)) {
+            query = { _id: new mongodb_1.ObjectId(userId) };
+        }
+        // Find user first to check role
+        const user = yield usersCollection.findOne(query);
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -587,8 +599,14 @@ app.delete("/api/users/:id", (req, res) => __awaiter(void 0, void 0, void 0, fun
                 });
             }
         }
-        // Elimina l'utente
-        const result = yield usersCollection.deleteOne({ _id: userId });
+        // Perform the deletion
+        const result = yield usersCollection.deleteOne(query);
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Nessun utente eliminato"
+            });
+        }
         res.status(200).json({
             success: true,
             message: "Utente eliminato con successo"

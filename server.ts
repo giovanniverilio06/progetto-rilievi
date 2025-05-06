@@ -581,6 +581,8 @@ app.post("/api/users", async (req: Request, res: Response) => {
 });
 
 // API per aggiornare un utente esistente
+// Fix the user update endpoint
+// Fix for the user update endpoint (around line 609)
 app.patch("/api/users/:id", async (req: Request, res: Response) => {
   const userId = req.params.id;
   const updateData = req.body;
@@ -592,7 +594,7 @@ app.patch("/api/users/:id", async (req: Request, res: Response) => {
     });
   }
   
-  // Rimuovi campi che non possono essere modificati direttamente
+  // Remove fields that shouldn't be modified directly
   if (updateData.password) delete updateData.password;
   if (updateData._id) delete updateData._id;
   
@@ -603,11 +605,17 @@ app.patch("/api/users/:id", async (req: Request, res: Response) => {
     const db = client.db(DB_NAME);
     const usersCollection = db.collection("Users");
     
-    // Aggiorna l'utente
-    const result = await usersCollection.updateOne(
-      { _id: userId },
-      { $set: updateData }
-    );
+    // IMPORTANT FIX: Check if userId is a valid ObjectId before trying to convert it
+    // Define query with proper union type
+    type UserQuery = { username: string } | { _id: ObjectId };
+    let query: UserQuery = { username: userId }; // Default to searching by username
+    
+    // Only try to use ObjectId if it's in the correct format
+    if (/^[0-9a-fA-F]{24}$/.test(userId)) {
+      query = { _id: new ObjectId(userId) } as UserQuery;
+    }
+    
+    const result = await usersCollection.updateOne(query, { $set: updateData });
     
     if (result.matchedCount === 0) {
       return res.status(404).json({
@@ -631,7 +639,8 @@ app.patch("/api/users/:id", async (req: Request, res: Response) => {
   }
 });
 
-// API per eliminare un utente
+// Fix the user delete endpoint
+// Fix the user delete endpoint
 app.delete("/api/users/:id", async (req: Request, res: Response) => {
   const userId = req.params.id;
   
@@ -649,8 +658,17 @@ app.delete("/api/users/:id", async (req: Request, res: Response) => {
     const db = client.db(DB_NAME);
     const usersCollection = db.collection("Users");
     
-    // Verifica se l'utente esiste e non è l'ultimo admin
-    const user = await usersCollection.findOne({ _id: userId });
+    // Define query with proper union type
+    type UserQuery = { username: string } | { _id: ObjectId };
+    let query: UserQuery = { username: userId }; // Default to username
+    
+    // Only try to use ObjectId if it's in the correct format
+    if (/^[0-9a-fA-F]{24}$/.test(userId)) {
+      query = { _id: new ObjectId(userId) } as UserQuery;
+    }
+    
+    // Find user first to check role
+    const user = await usersCollection.findOne(query);
     
     if (!user) {
       return res.status(404).json({
@@ -671,8 +689,15 @@ app.delete("/api/users/:id", async (req: Request, res: Response) => {
       }
     }
     
-    // Elimina l'utente
-    const result = await usersCollection.deleteOne({ _id: userId });
+    // Perform the deletion
+    const result = await usersCollection.deleteOne(query);
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Nessun utente eliminato"
+      });
+    }
     
     res.status(200).json({
       success: true,
@@ -688,7 +713,6 @@ app.delete("/api/users/:id", async (req: Request, res: Response) => {
     await client.close();
   }
 });
-
 
 // POST endpoint to create a new perizia
 app.post("/api/perizie", async (req: Request, res: Response) => {

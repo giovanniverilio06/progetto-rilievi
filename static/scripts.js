@@ -4183,6 +4183,7 @@ async function performAssignPerizie(operatore, perizieIds) {
 }
 
 // Modifica operatore
+// Fix the edit operator function
 async function editOperatore(operatorId) {
     try {
         // Verifica che l'utente sia amministratore
@@ -4193,45 +4194,41 @@ async function editOperatore(operatorId) {
         const operatore = operatori.find(op => op.username === operatorId);
 
         if (!operatore) {
-            throw new Error('Operatore non trovato');
+            console.error(`Operatore con ID ${operatorId} non trovato`);
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Errore',
+                    text: `Operatore non trovato`
+                });
+            }
+            return;
         }
 
         // Mostra la form per la modifica
         if (window.Swal) {
             Swal.fire({
-                title: `Modifica Operatore: ${operatore.username}`,
+                title: `Modifica Operatore: ${operatore.firstName || ''} ${operatore.lastName || ''}`,
                 html: `
-                        <form id="editOperatorForm" class="text-start">
-                            <div class="mb-3">
-                                <label for="editFirstName" class="form-label">Nome</label>
-                                <input type="text" class="form-control" id="editFirstName" value="${operatore.firstName || ''}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="editLastName" class="form-label">Cognome</label>
-                                <input type="text" class="form-control" id="editLastName" value="${operatore.lastName || ''}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="editEmail" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="editEmail" value="${operatore.email || ''}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="editRole" class="form-label">Ruolo</label>
-                                <select class="form-select" id="editRole">
-                                    <option value="user" ${operatore.role !== 'admin' ? 'selected' : ''}>Operatore</option>
-                                    <option value="admin" ${operatore.role === 'admin' ? 'selected' : ''}>Amministratore</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="resetPassword">
-                                    <label class="form-check-label" for="resetPassword">
-                                        Reimposta password
-                                    </label>
-                                </div>
-                            </div>
-                        </form>
-                    `,
-                width: 600,
+                    <form id="editOperatorForm" class="text-start">
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">Nome</label>
+                            <input type="text" class="form-control" id="firstName" value="${operatore.firstName || ''}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Cognome</label>
+                            <input type="text" class="form-control" id="lastName" value="${operatore.lastName || ''}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" value="${operatore.email || ''}">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="resetPassword">
+                            <label class="form-check-label" for="resetPassword">Reset password</label>
+                        </div>
+                    </form>
+                `,
                 showCancelButton: true,
                 confirmButtonText: 'Salva',
                 cancelButtonText: 'Annulla',
@@ -4239,10 +4236,9 @@ async function editOperatore(operatorId) {
                 cancelButtonColor: '#dc3545',
                 preConfirm: () => {
                     return {
-                        firstName: document.getElementById('editFirstName').value,
-                        lastName: document.getElementById('editLastName').value,
-                        email: document.getElementById('editEmail').value,
-                        role: document.getElementById('editRole').value,
+                        firstName: document.getElementById('firstName').value,
+                        lastName: document.getElementById('lastName').value,
+                        email: document.getElementById('email').value,
                         resetPassword: document.getElementById('resetPassword').checked
                     };
                 }
@@ -4251,8 +4247,6 @@ async function editOperatore(operatorId) {
                     await updateOperatore(operatorId, result.value);
                 }
             });
-        } else {
-            alert('Modifica operatore non disponibile. Verifica che SweetAlert2 sia caricato.');
         }
     } catch (error) {
         console.error("Errore nella modifica dell'operatore:", error);
@@ -4262,12 +4256,9 @@ async function editOperatore(operatorId) {
                 title: 'Errore',
                 text: `Impossibile modificare l'operatore: ${error.message}`
             });
-        } else {
-            alert(`Errore: ${error.message}`);
         }
     }
 }
-
 // Aggiorna operatore
 async function updateOperatore(operatorId, updateData) {
     try {
@@ -4275,7 +4266,7 @@ async function updateOperatore(operatorId, updateData) {
         if (window.Swal) {
             Swal.fire({
                 title: 'Aggiornamento in corso...',
-                html: 'Attendere prego',
+                text: 'Attendere prego',
                 allowOutsideClick: false,
                 didOpen: () => {
                     Swal.showLoading();
@@ -4285,28 +4276,29 @@ async function updateOperatore(operatorId, updateData) {
 
         // Gestisci il reset della password se richiesto
         if (updateData.resetPassword) {
-            updateData.password = 'changeme';
-            updateData.firstLogin = true;
+            const tempPassword = 'changeme';
+            await inviaRichiesta("PATCH", "/api/users/password", {
+                username: operatorId,
+                newPassword: tempPassword,
+                firstLogin: true
+            });
             delete updateData.resetPassword;
         }
-
-        // Esegui la chiamata API per aggiornare l'operatore
-        await inviaRichiesta("PATCH", `/api/users/${operatorId}`, updateData);
+        const response = await inviaRichiesta("PATCH", `/api/users/${operatorId}`, updateData);
+        console.log("Risposta aggiornamento operatore:", response);
 
         // Mostra messaggio di successo
         if (window.Swal) {
             Swal.fire({
                 icon: 'success',
-                title: 'Aggiornamento completato',
-                text: `Operatore ${operatorId} aggiornato con successo`,
+                title: 'Operatore aggiornato',
+                text: 'Le informazioni dell\'operatore sono state aggiornate con successo',
                 confirmButtonColor: '#28a745'
             });
-        } else {
-            alert(`Operatore ${operatorId} aggiornato con successo`);
         }
 
         // Ricarica i dati
-        loadOperatori();
+        await loadOperatori();
 
     } catch (error) {
         console.error("Errore nell'aggiornamento dell'operatore:", error);
@@ -4314,15 +4306,13 @@ async function updateOperatore(operatorId, updateData) {
             Swal.fire({
                 icon: 'error',
                 title: 'Errore',
-                text: `Si è verificato un errore durante l'aggiornamento: ${error.message}`,
-                confirmButtonColor: '#3085d6'
+                text: `Impossibile aggiornare l'operatore: ${error.message}`
             });
-        } else {
-            alert(`Si è verificato un errore durante l'aggiornamento: ${error.message}`);
         }
     }
 }
 
+// 
 // Elimina operatore
 async function deleteOperatore(operatorId) {
     try {
@@ -4335,18 +4325,18 @@ async function deleteOperatore(operatorId) {
         if (window.Swal) {
             const result = await Swal.fire({
                 title: 'Conferma eliminazione',
-                text: `Sei sicuro di voler eliminare l'operatore ${operatorId}? Questa azione non può essere annullata.`,
+                text: `Sei sicuro di voler eliminare questo operatore? Questa azione non può essere annullata.`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Sì, elimina',
-                cancelButtonText: 'Annulla',
                 confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6'
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sì, elimina',
+                cancelButtonText: 'Annulla'
             });
-
+            
             confirmDelete = result.isConfirmed;
         } else {
-            confirmDelete = confirm(`Sei sicuro di voler eliminare l'operatore ${operatorId}? Questa azione non può essere annullata.`);
+            confirmDelete = confirm(`Sei sicuro di voler eliminare questo operatore? Questa azione non può essere annullata.`);
         }
 
         if (!confirmDelete) return;
@@ -4355,7 +4345,7 @@ async function deleteOperatore(operatorId) {
         if (window.Swal) {
             Swal.fire({
                 title: 'Eliminazione in corso...',
-                html: 'Attendere prego',
+                text: 'Attendere prego',
                 allowOutsideClick: false,
                 didOpen: () => {
                     Swal.showLoading();
@@ -4363,39 +4353,45 @@ async function deleteOperatore(operatorId) {
             });
         }
 
-        // Esegui la chiamata API per eliminare l'operatore
-        await inviaRichiesta("DELETE", `/api/users/${operatorId}`);
+        // Direct API call to ensure proper error handling
+        const response = await fetch(`/api/users/${operatorId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Errore ${response.status}`);
+        }
 
         // Mostra messaggio di successo
         if (window.Swal) {
             Swal.fire({
                 icon: 'success',
-                title: 'Eliminazione completata',
-                text: `Operatore ${operatorId} eliminato con successo`,
+                title: 'Operatore eliminato',
+                text: 'L\'operatore è stato eliminato con successo',
                 confirmButtonColor: '#28a745'
             });
-        } else {
-            alert(`Operatore ${operatorId} eliminato con successo`);
         }
-
-        // Ricarica i dati
-        loadOperatori();
-
-    } catch (error) {
-        console.error("Errore nell'eliminazione dell'operatore:", error);
-        if (window.Swal) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Errore',
-                text: `Si è verificato un errore durante l'eliminazione: ${error.message}`,
-                confirmButtonColor: '#3085d6'
-            });
-        } else {
-            alert(`Si è verificato un errore durante l'eliminazione: ${error.message}`);
+                // Ricarica i dati
+                await loadOperatori();
+        
+                // Also reload perizie since they might reference this operator
+                await loadPerizie();
+        
+            } catch (error) {
+                console.error("Errore nell'eliminazione dell'operatore:", error);
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Errore',
+                        text: `Impossibile eliminare l'operatore: ${error.message}`
+                    });
+                }
+            }
         }
-    }
-}
-
 // Funzione per aggiungere un nuovo operatore
 async function addOperatore() {
     try {
