@@ -137,11 +137,6 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#perizie-utente">
-                                <i class="fas fa-user-check me-1"></i>Perizie Utente
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link" href="#operatori">
                                 <i class="fas fa-users me-1"></i>Operatori
                             </a>
@@ -312,9 +307,6 @@
                     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                         <h1 class="h2">Operatori</h1>
                         <div class="btn-toolbar mb-2 mb-md-0">
-                            <button id="refreshOperatori" class="btn btn-sm btn-outline-secondary me-2">
-                                <i class="fas fa-sync-alt me-1"></i>Aggiorna
-                            </button>
                             <button id="addOperatoreBtn" class="btn btn-sm btn-primary" onclick="addOperatore()">
                                 <i class="fas fa-user-plus me-1"></i>Nuovo Operatore
                             </button>
@@ -343,14 +335,7 @@
             <div id="perizie-content" class="d-none">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2">Gestione Perizie</h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <button type="button" class="btn btn-sm btn-outline-primary me-2" id="addNewPerizia">
-                            <i class="fas fa-plus me-1"></i>Nuova Perizia
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshPerizie">
-                            <i class="fas fa-sync-alt me-1"></i>Aggiorna
-                        </button>
-                    </div>
+                    
                 </div>
                 
                 <!-- Mappa delle perizie -->
@@ -495,14 +480,7 @@
             <div id="user-perizie-content" class="d-none">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2">Le Mie Perizie</h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <button type="button" class="btn btn-sm btn-primary me-2" id="userAddNewPerizia">
-                            <i class="fas fa-plus me-1"></i>Nuova Perizia
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="userRefreshPerizie">
-                            <i class="fas fa-sync-alt me-1"></i>Aggiorna
-                        </button>
-                    </div>
+                    
                 </div>
 
                 <!-- Stato delle perizie -->

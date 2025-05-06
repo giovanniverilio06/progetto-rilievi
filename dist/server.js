@@ -66,17 +66,7 @@ const whitelist = [
     'http://localhost:8100', // porta 8100 (default)
 ];
 const corsOptions = {
-    origin: function (origin, callback) {
-        if (!origin)
-            // browser direct call
-            return callback(null, true);
-        if (whitelist.indexOf(origin) === -1) {
-            var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
-        }
-        else
-            return callback(null, true);
-    },
+    origin: '*',
     credentials: true
 };
 app.use('/', (0, cors_1.default)(corsOptions));
@@ -289,26 +279,28 @@ app.patch("/api/perizie/:id", (req, res) => __awaiter(void 0, void 0, void 0, fu
         yield client.close();
     }
 }));
-// Endpoint per eliminare una perizia
+// DELETE a single perizia
 app.delete("/api/perizie/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const periziaId = req.params.id;
     if (!periziaId) {
-        return res.status(400).send("ID perizia mancante");
+        return res.status(400).json({
+            success: false,
+            message: "ID perizia mancante"
+        });
     }
     const client = new mongodb_1.MongoClient(connectionString);
     try {
         yield client.connect();
         const db = client.db(DB_NAME);
         const perizieCollection = db.collection("Perizie");
-        // Verifica che la perizia esista
-        const perizia = yield perizieCollection.findOne({ id: periziaId });
-        if (!perizia) {
-            return res.status(404).send("Perizia non trovata");
-        }
-        // Elimina la perizia
+        console.log(`Attempting to delete perizia with ID: ${periziaId}`);
+        // IMPORTANT: Make sure we're using string comparison if IDs are strings
         const result = yield perizieCollection.deleteOne({ id: periziaId });
         if (result.deletedCount === 0) {
-            return res.status(400).send("Nessuna perizia eliminata");
+            return res.status(404).json({
+                success: false,
+                message: "Perizia non trovata"
+            });
         }
         res.status(200).json({
             success: true,
@@ -316,81 +308,87 @@ app.delete("/api/perizie/:id", (req, res) => __awaiter(void 0, void 0, void 0, f
         });
     }
     catch (error) {
-        console.error("Errore durante l'eliminazione della perizia:", error);
-        res.status(500).send(`Errore durante l'eliminazione: ${error}`);
+        console.error("Error deleting perizia:", error);
+        res.status(500).json({
+            success: false,
+            message: "Errore durante l'eliminazione della perizia",
+        });
     }
     finally {
         yield client.close();
     }
 }));
-// Endpoint per eliminare più perizie contemporaneamente
-app.delete("/api/perizie", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { ids } = req.body;
-    if (!ids || !Array.isArray(ids) || ids.length === 0) {
-        return res.status(400).send("IDs perizie mancanti o formato non valido");
+// DELETE multiple perizie
+// Endpoint per eliminare una singola perizia
+// Route for deleting a single perizia by ID
+app.delete("/api/perizie/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const periziaId = req.params.id;
+    if (!periziaId) {
+        return res.status(400).json({
+            success: false,
+            message: "ID perizia mancante"
+        });
     }
+    console.log("Eliminazione perizia con ID:", periziaId);
     const client = new mongodb_1.MongoClient(connectionString);
     try {
         yield client.connect();
         const db = client.db(DB_NAME);
         const perizieCollection = db.collection("Perizie");
-        // Elimina le perizie
-        const result = yield perizieCollection.deleteMany({ id: { $in: ids } });
+        // Delete the perizia using the id field
+        const result = yield perizieCollection.deleteOne({ id: periziaId });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Perizia non trovata"
+            });
+        }
+        console.log(`Perizia eliminata con ID: ${periziaId}`);
         res.status(200).json({
             success: true,
-            message: `${result.deletedCount} perizie eliminate con successo`,
-            count: result.deletedCount
+            message: "Perizia eliminata con successo"
         });
     }
     catch (error) {
-        console.error("Errore durante l'eliminazione delle perizie:", error);
-        res.status(500).send(`Errore durante l'eliminazione: ${error}`);
+        console.error("Errore nell'eliminazione della perizia:", error);
+        res.status(500).json({
+            success: false,
+            message: "Errore durante l'eliminazione della perizia",
+            error
+        });
     }
     finally {
         yield client.close();
     }
 }));
-// Endpoint per creare una nuova perizia
-app.post("/api/perizie", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const perizia = req.body;
-    // Validazione dei dati
-    if (!perizia || !perizia.id || !perizia.operatore || !perizia.tipo || !perizia.descrizione ||
-        !perizia.posizione || !perizia.cliente) {
+// Endpoint per eliminare multiple perizie
+app.delete("/api/eliminaPerizie", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
         return res.status(400).json({
             success: false,
-            message: "Dati della perizia insufficienti o non validi"
+            message: "Lista di ID perizie mancante o non valida"
         });
     }
+    console.log("Eliminazione multiple perizie con IDs:", ids);
     const client = new mongodb_1.MongoClient(connectionString);
     try {
         yield client.connect();
-        const collection = client.db(DB_NAME).collection("Perizie");
-        // Verifica che non esista già una perizia con lo stesso ID
-        const existing = yield collection.findOne({ id: perizia.id });
-        if (existing) {
-            return res.status(409).json({
-                success: false,
-                message: "Esiste già una perizia con questo ID"
-            });
-        }
-        // Inserisci la nuova perizia
-        const result = yield collection.insertOne(perizia);
-        if (result.acknowledged) {
-            res.status(201).json({
-                success: true,
-                message: "Perizia creata con successo",
-                data: perizia
-            });
-        }
-        else {
-            throw new Error("Errore nell'inserimento della perizia");
-        }
+        const db = client.db(DB_NAME);
+        const perizieCollection = db.collection("Perizie");
+        // Usa deleteMany con $in per eliminare documenti multipli
+        const result = yield perizieCollection.deleteMany({ id: { $in: ids } });
+        console.log(`Eliminate ${result.deletedCount} perizie`);
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} perizie eliminate con successo`
+        });
     }
     catch (error) {
-        console.error("Errore nella creazione della perizia:", error);
+        console.error("Errore nell'eliminazione delle perizie:", error);
         res.status(500).json({
             success: false,
-            message: `Errore nella creazione della perizia: ${error}`
+            message: "Errore durante l'eliminazione delle perizie",
         });
     }
     finally {

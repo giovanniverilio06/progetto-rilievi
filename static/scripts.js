@@ -2607,26 +2607,171 @@ async function deleteSelectedPerizie() {
 
 // Function to update a perizia
 // Function to update a perizia
+async function editPerizia(id) {
+    try {
+        // Find the perizia in the array
+        const perizia = window.perizie.find(p => p.id === id);
+        
+        if (!perizia) {
+            console.error(`Perizia with ID ${id} not found`);
+            return;
+        }
+        
+        // Format date for input field
+        const formattedDate = perizia.data ? new Date(perizia.data).toISOString().slice(0, 16) : '';
+        
+        if (window.Swal) {
+            Swal.fire({
+                title: `Modifica Perizia ${perizia.id}`,
+                html: `
+                    <form id="editPeriziaForm" class="text-start">
+                        <div class="mb-3">
+                            <label for="editType" class="form-label">Tipo di perizia</label>
+                            <select class="form-select" id="editType">
+                                <option value="">Seleziona il tipo</option>
+                                <option value="incendio" ${perizia.tipo === 'incendio' ? 'selected' : ''}>Incendio</option>
+                                <option value="allagamento" ${perizia.tipo === 'allagamento' ? 'selected' : ''}>Allagamento</option>
+                                <option value="grandine" ${perizia.tipo === 'grandine' ? 'selected' : ''}>Grandine</option>
+                                <option value="furto" ${perizia.tipo === 'furto' ? 'selected' : ''}>Furto</option>
+                                <option value="altro" ${perizia.tipo === 'altro' ? 'selected' : ''}>Altro</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editAddress" class="form-label">Indirizzo</label>
+                            <input type="text" class="form-control" id="editAddress" value="${perizia.posizione && perizia.posizione.indirizzo ? perizia.posizione.indirizzo : ''}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDescription" class="form-label">Descrizione</label>
+                            <textarea class="form-control" id="editDescription" rows="3">${perizia.descrizione || ''}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editStatus" class="form-label">Stato</label>
+                            <select class="form-select" id="editStatus">
+                                <option value="pending" ${perizia.stato === 'pending' ? 'selected' : ''}>In attesa</option>
+                                <option value="scheduled" ${perizia.stato === 'scheduled' ? 'selected' : ''}>Pianificata</option>
+                                <option value="in_progress" ${perizia.stato === 'in_progress' ? 'selected' : ''}>In corso</option>
+                                <option value="completed" ${perizia.stato === 'completed' ? 'selected' : ''}>Completata</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDate" class="form-label">Data</label>
+                            <input type="datetime-local" class="form-control" id="editDate" value="${formattedDate}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editClientName" class="form-label">Nome Cliente</label>
+                            <input type="text" class="form-control" id="editClientName" value="${perizia.cliente && perizia.cliente.nome ? perizia.cliente.nome : ''}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editClientContact" class="form-label">Contatto Cliente</label>
+                            <input type="text" class="form-control" id="editClientContact" value="${perizia.cliente && perizia.cliente.contatto ? perizia.cliente.contatto : ''}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editPolicy" class="form-label">Numero Polizza</label>
+                            <input type="text" class="form-control" id="editPolicy" value="${perizia.polizza || ''}">
+                        </div>
+                    </form>
+                `,
+                width: 600,
+                showCancelButton: true,
+                confirmButtonText: 'Salva Modifiche',
+                cancelButtonText: 'Annulla',
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#dc3545',
+                preConfirm: () => {
+                    // Validate form
+                    const type = document.getElementById('editType').value;
+                    const address = document.getElementById('editAddress').value?.trim();
+                    const description = document.getElementById('editDescription').value?.trim();
+                    
+                    if (!type || !address || !description) {
+                        Swal.showValidationMessage('I campi Tipo, Indirizzo e Descrizione sono obbligatori');
+                        return false;
+                    }
+                    
+                    return {
+                        tipo: type,
+                        posizione: {
+                            ...perizia.posizione,
+                            indirizzo: address
+                        },
+                        descrizione: description,
+                        stato: document.getElementById('editStatus').value,
+                        data: document.getElementById('editDate').value ? new Date(document.getElementById('editDate').value).toISOString() : perizia.data,
+                        cliente: {
+                            nome: document.getElementById('editClientName').value?.trim() || '',
+                            contatto: document.getElementById('editClientContact').value?.trim() || ''
+                        },
+                        polizza: document.getElementById('editPolicy').value?.trim() || '',
+                        ultimoAggiornamento: new Date().toISOString()
+                    };
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    // Update the perizia
+                    await updatePerizia(id, result.value);
+                }
+            });
+        } else {
+            alert('Modifica perizia non disponibile. Verifica che SweetAlert2 sia caricato.');
+        }
+    } catch (error) {
+        console.error('Errore nella modifica della perizia:', error);
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Errore',
+                text: `Si è verificato un errore: ${error.message}`,
+                confirmButtonColor: '#dc3545'
+            });
+        } else {
+            alert(`Errore: ${error.message}`);
+        }
+    }
+}
+
 async function updatePerizia(id, updateData) {
     try {
-        // Add 'updated' status if not specified
-        if (!updateData.stato) {
-            updateData.stato = 'updated';
+        // Show loading indicator
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Aggiornamento in corso...',
+                text: 'Attendere prego',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+        
+        // Validate the status value if present
+        if (updateData.stato) {
+            // Check if it's a valid status
+            const validStatuses = ['pending', 'scheduled', 'in_progress', 'completed'];
+            if (!validStatuses.includes(updateData.stato)) {
+                updateData.stato = 'pending'; // Default to pending if invalid
+            }
         }
         
         // Update lastUpdate timestamp
         updateData.ultimoAggiornamento = new Date().toISOString();
         
         // Make API call
-        await inviaRichiesta("PATCH", `/api/perizie/${id}`, updateData);
+        const response = await fetch(`/api/perizie/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updateData)
+        });
         
-        // Update local data
-        if (window.perizie) {
-            const index = window.perizie.findIndex(p => p.id === id);
-            if (index !== -1) {
-                window.perizie[index] = { ...window.perizie[index], ...updateData };
-            }
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Server error: ${response.status} - ${errorText}`);
         }
+        
+        // Update local data and UI
+        await loadPerizie();
+        loadPerizieTable();
         
         // Show success message
         if (window.Swal) {
@@ -2639,10 +2784,6 @@ async function updatePerizia(id, updateData) {
         } else {
             alert(`La perizia ${id} è stata aggiornata con successo`);
         }
-        
-        // Reload data
-        await loadPerizie();
-        loadPerizieTable();
         
     } catch (error) {
         console.error("Errore nell'aggiornamento della perizia:", error);
@@ -2659,7 +2800,112 @@ async function updatePerizia(id, updateData) {
     }
 }
 
-
+// Function to load recent perizie in the dashboard
+function loadRecentPerizieDashboard(perizie) {
+    console.log("Loading recent perizie for dashboard");
+    const tableBody = document.getElementById("inspectionTableBody");
+    
+    if (!tableBody) {
+        console.error("Element inspectionTableBody not found");
+        return;
+    }
+    
+    // Clear the table
+    tableBody.innerHTML = '';
+    
+    // Sort perizie by date (most recent first) and take only the first 5
+    const recentPerizie = [...perizie]
+        .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+        .slice(0, 5);
+    
+    if (recentPerizie.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-3">Non ci sono perizie disponibili</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    // Populate the table with recent perizie
+    recentPerizie.forEach(perizia => {
+        const row = document.createElement('tr');
+        
+        // Format date
+        const formattedDate = new Date(perizia.data).toLocaleString('it-IT', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // Determine status badge
+        const statusText = getStatusText(perizia.stato, perizia.operatoreId);
+        const statusBadgeColor = getStatusBadgeColor(perizia.stato, perizia.operatoreId);
+        const statusBadge = `<span class="badge bg-${statusBadgeColor}">${statusText}</span>`;
+        
+        // Count photos
+        const numFoto = perizia.fotografie ? perizia.fotografie.length : 0;
+        
+        row.innerHTML = `
+            <td>${perizia.id}</td>
+            <td>${perizia.operatore || 'N/D'}</td>
+            <td>${formattedDate}</td>
+            <td>${perizia.tipo || 'N/D'}</td>
+            <td>${perizia.posizione && perizia.posizione.indirizzo ? perizia.posizione.indirizzo : 'N/D'}</td>
+            <td>${statusBadge}</td>
+            <td>${numFoto}</td>
+            <td class="text-end">
+                <button class="btn btn-sm btn-info view-inspection" data-id="${perizia.id}">
+                    <i class="fas fa-eye"></i>
+                </button>
+                ${!perizia.operatoreId ? 
+                    `<button class="btn btn-sm btn-success assign-inspection-dashboard" data-id="${perizia.id}">
+                        <i class="fas fa-user-check"></i>
+                    </button>` : ''}
+                <button class="btn btn-sm btn-warning edit-inspection" data-id="${perizia.id}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger delete-inspection" data-id="${perizia.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+    
+    // Add event listeners to the buttons
+    document.querySelectorAll('.view-inspection').forEach(btn => {
+        btn.addEventListener('click', function () {
+            viewPerizia(this.getAttribute('data-id'));
+        });
+    });
+    
+    document.querySelectorAll('.edit-inspection').forEach(btn => {
+        btn.addEventListener('click', function () {
+            editPerizia(this.getAttribute('data-id'));
+        });
+    });
+    
+    document.querySelectorAll('.delete-inspection').forEach(btn => {
+        btn.addEventListener('click', function () {
+            deletePerizia(this.getAttribute('data-id'));
+        });
+    });
+    
+    // Add event listener for assign button
+    document.querySelectorAll('.assign-inspection-dashboard').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const periziaId = this.getAttribute('data-id');
+            assignSinglePerizia(periziaId);
+        });
+    });
+    
+    // Update the operators in perizia list
+    updateOperatoriInPerizia(perizie);
+}
 // Fixed function for loading perizie table
 // Fixed function for loading perizie table
 function loadPerizieTable(filteredPerizie = null) {
@@ -3209,9 +3455,13 @@ async function deleteSelectedPerizie() {
 }
 
 // Function to delete selected perizie (corrected version)
+// Fixed implementation for deleteSelectedPerizie
 async function deleteSelectedPerizie() {
     // Check if user is admin
-    if (!isUserAdmin()) {
+    const userData = JSON.parse(localStorage.getItem("currentUser"));
+    const isAdmin = userData && userData.role === 'admin';
+    
+    if (!isAdmin) {
         if (window.Swal) {
             Swal.fire({
                 icon: 'error',
@@ -3228,6 +3478,13 @@ async function deleteSelectedPerizie() {
     const selectedCheckboxes = document.querySelectorAll('.inspection-select:checked');
     if (selectedCheckboxes.length === 0) {
         console.log("Nessuna perizia selezionata per l'eliminazione");
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Attenzione',
+                text: 'Nessuna perizia selezionata'
+            });
+        }
         return;
     }
 
@@ -3267,9 +3524,9 @@ async function deleteSelectedPerizie() {
                 }
             });
         }
-
-        // Direct API call without going through another function
-        const response = await fetch('/api/perizie', {
+        
+        // Use the proper endpoint from your server
+        const response = await fetch('/api/eliminaPerizie', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -3278,26 +3535,28 @@ async function deleteSelectedPerizie() {
         });
         
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Server response: ${response.status} - ${errorText}`);
             throw new Error(`Errore server: ${response.status} ${response.statusText}`);
         }
         
-        // Reload perizie after deletion
+        // Reload perizie
         await loadPerizie();
         loadPerizieTable();
         updatePerizieCounts();
-
-        // Show success message
+        
         if (window.Swal) {
             Swal.fire({
                 icon: 'success',
                 title: 'Eliminazione completata',
-                text: 'Perizie eliminate con successo'
+                text: `${ids.length} perizie eliminate con successo`
             });
         } else {
-            alert('Perizie eliminate con successo');
+            alert(`${ids.length} perizie eliminate con successo`);
         }
     } catch (error) {
         console.error("Errore nell'eliminazione delle perizie:", error);
+        
         if (window.Swal) {
             Swal.fire({
                 icon: 'error',
@@ -3309,7 +3568,6 @@ async function deleteSelectedPerizie() {
         }
     }
 }
-
 // Funzioni per la sezione operatori
 
 // Inizializza la sezione operatori
