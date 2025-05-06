@@ -664,7 +664,7 @@ window.onload = function () {
         if (sortedPerizie.length === 0) {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="9" class="text-center py-3">Non ci sono perizie disponibili</td>
+                    <td colspan="8" class="text-center py-3">Non ci sono perizie disponibili</td>
                 </tr>
             `;
             return;
@@ -690,12 +690,8 @@ window.onload = function () {
             // Count photos
             const numFoto = perizia.fotografie ? perizia.fotografie.length : 0;
         
+            // RIMOSSO IL CHECKBOX TD
             row.innerHTML = `
-                <td>
-                    <div class="form-check">
-                        <input class="form-check-input inspection-select" type="checkbox" data-id="${perizia.id}">
-                    </div>
-                </td>
                 <td>${perizia.id}</td>
                 <td>${perizia.operatore || 'N/D'}</td>
                 <td>${formattedDate}</td>
@@ -722,6 +718,7 @@ window.onload = function () {
         
             tableBody.appendChild(row);
         });
+    
     
         // Aggiungi listener agli elementi appena creati
         document.querySelectorAll('.view-inspection').forEach(btn => {
@@ -1235,6 +1232,9 @@ async function initPeriziePage() {
     // Initialize map
     initPerizieMappa();
     
+    // Populate the operator filter dropdown
+    populateOperatorFilter();
+    
     // Load perizie into table
     loadPerizieTable();
     
@@ -1244,75 +1244,47 @@ async function initPeriziePage() {
     // Initialize filter listeners
     initFilterListeners();
 }
-    function updateDashboardStatistics(perizie) {
-        // Totale perizie
-        const totalElement = document.getElementById("totalInspections");
-        if (totalElement) totalElement.textContent = perizie.length;
-
-        // Operatori attivi (operatori con almeno una perizia in corso)
-        const perizieInCorso = perizie.filter(p => p.stato === "in_progress");
-        const operatoriAttivi = [...new Set(perizieInCorso.map(p => p.operatoreId))].filter(Boolean);
-        const activeElement = document.getElementById("activeUsers");
-        if (activeElement) activeElement.textContent = operatoriAttivi.length;
-
-        // Perizie in attesa (non assegnate)
-        const perizieInAttesa = perizie.filter(p => !p.operatoreId && !p.operatore).length;
-        const pendingElement = document.getElementById("pendingInspections");
-        if (pendingElement) pendingElement.textContent = perizieInAttesa;
-    }
-
-    function updateDashboardStatistics(perizie) {
-        // Totale perizie
-        const totalElement = document.getElementById("totalInspections");
-        if (totalElement) totalElement.textContent = perizie.length;
-
-        // Operatori attivi (conteggio unico degli operatori)
-        const operatoriUnici = [...new Set(perizie.map(p => p.operatoreId))].filter(Boolean);
-        const activeElement = document.getElementById("activeUsers");
-        if (activeElement) activeElement.textContent = operatoriUnici.length;
-
-        // Perizie in attesa (non assegnate)
-        const perizieInAttesa = perizie.filter(p => !p.operatoreId && !p.operatore).length;
-        const pendingElement = document.getElementById("pendingInspections");
-        if (pendingElement) pendingElement.textContent = perizieInAttesa;
-    }
     // Nuova funzione per creare la tabella delle perizie se non esiste
     function createPerizieTable() {
-        const perizieContent = document.getElementById('perizie-content');
-        if (!perizieContent) return;
-
-        const cardBody = perizieContent.querySelector('.card-body');
-        if (!cardBody) {
-            console.error("Card body not found in perizie-content");
+        console.log("Inizializzazione tabella perizie");
+        
+        // Controlliamo che l'elemento table body esista già
+        const tableBody = document.getElementById('perizieTableBody');
+        if (!tableBody) {
+            console.error("Elemento perizieTableBody non trovato");
             return;
         }
-
-        const tableResponsive = document.createElement('div');
-        tableResponsive.className = 'table-responsive';
-
-        tableResponsive.innerHTML = `
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Operatore</th>
-                        <th>Data</th>
-                        <th>Tipo</th>
-                        <th>Indirizzo</th>
-                        <th>Stato</th>
-                        <th>Foto</th>
-                        <th>Azioni</th>
-                    </tr>
-                </thead>
-                <tbody id="perizieTableBody">
-                    <!-- Dati perizie verranno inseriti qui -->
-                </tbody>
-            </table>
-        `;
-
-        cardBody.appendChild(tableResponsive);
+        
+        // Svuota solo il body della tabella
+        tableBody.innerHTML = '';
+        
+        // Configura i controlli di selezione
+        const selectAllCheckbox = document.getElementById('selectAllInspections');
+        const headerCheckbox = document.getElementById('headerCheckbox');
+        const deleteSelectedBtn = document.getElementById('deleteSelectedInspections');
+        
+        if (selectAllCheckbox && headerCheckbox) {
+            // Assicurati che entrambi i checkbox si comportino allo stesso modo
+            selectAllCheckbox.addEventListener('change', function() {
+                headerCheckbox.checked = this.checked;
+                toggleAllCheckboxes(this.checked);
+            });
+            
+            headerCheckbox.addEventListener('change', function() {
+                selectAllCheckbox.checked = this.checked;
+                toggleAllCheckboxes(this.checked);
+            });
+        }
+        
+        if (deleteSelectedBtn) {
+            deleteSelectedBtn.addEventListener('click', function() {
+                deleteSelectedPerizie();
+            });
+        }
+        
+        // Aggiungi event listener per la selezione
+        setupPerizieButtons();
     }
-
     // Funzione per inizializzare la mappa delle perizie
     function initPerizieMappa() {
         console.log("Inizializzazione mappa perizie");
@@ -1339,7 +1311,7 @@ async function initPeriziePage() {
             const sedeCoords = [44.7005, 7.8472];
     
             // Inizializza la mappa centrata su Bra con zoom appropriato per la città
-            window.perizieMap = L.map('perizieMappa').setView(sedeCoords, 13);
+            window.perizieMap = L.map('perizieMappa').setView(sedeCoords, 17);
     
             // Aggiungi il layer di OpenStreetMap
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1453,22 +1425,32 @@ async function initPeriziePage() {
 
     // Funzione per popolare i filtri degli operatori
     function populateOperatorFilter() {
-        if (!window.perizie) return;
-
+        console.log("Popolamento filtro operatori");
+        
+        if (!window.perizie) {
+            console.warn("Nessuna perizia disponibile per popolare il filtro operatori");
+            return;
+        }
+    
         const filterSelect = document.getElementById('filterOperator');
-        if (!filterSelect) return;
-
+        if (!filterSelect) {
+            console.warn("Elemento filterOperator non trovato nel DOM");
+            return;
+        }
+    
         // Svuota il select tranne l'opzione "Tutti gli operatori"
         while (filterSelect.options.length > 1) {
             filterSelect.remove(1);
         }
-
-        // Estrai operatori unici
+    
+        // Estrai operatori unici (solo quelli che hanno effettivamente un nome)
         const operatori = [...new Set(window.perizie
             .map(p => p.operatore)
             .filter(Boolean)
         )];
-
+        
+        console.log(`Trovati ${operatori.length} operatori unici`);
+    
         // Aggiungi le opzioni
         operatori.forEach(operatore => {
             const option = document.createElement('option');
@@ -1515,42 +1497,49 @@ async function initPeriziePage() {
 
     // Funzione aggiornata per applicare filtri alle perizie
     function applyFiltersToPerizie() {
-        if (!window.perizie) return;
-
+        console.log("Applicazione filtri alle perizie");
+        
+        if (!window.perizie) {
+            console.warn("Nessuna perizia disponibile per applicare i filtri");
+            return;
+        }
+    
         const filterOperator = document.getElementById('filterOperator');
         const filterDate = document.getElementById('filterDate');
-        // State filter reference removed
-
+        
         let filteredPerizie = [...window.perizie];
-
+        console.log(`Totale perizie prima del filtro: ${filteredPerizie.length}`);
+    
         // Filtra per operatore se selezionato
         if (filterOperator && filterOperator.value) {
-            filteredPerizie = filteredPerizie.filter(p =>
-                p.operatore && p.operatore.includes(filterOperator.value)
+            console.log(`Filtro per operatore: ${filterOperator.value}`);
+            filteredPerizie = filteredPerizie.filter(p => 
+                p.operatore && p.operatore === filterOperator.value
             );
+            console.log(`Perizie dopo filtro operatore: ${filteredPerizie.length}`);
         }
-
+    
         // Filtra per data se selezionata
         if (filterDate && filterDate.value) {
+            console.log(`Filtro per data: ${filterDate.value}`);
             const selectedDate = new Date(filterDate.value);
             selectedDate.setHours(0, 0, 0, 0);
-
+    
             filteredPerizie = filteredPerizie.filter(p => {
                 if (!p.data) return false;
                 const periziaDate = new Date(p.data);
                 periziaDate.setHours(0, 0, 0, 0);
                 return periziaDate.getTime() === selectedDate.getTime();
             });
+            console.log(`Perizie dopo filtro data: ${filteredPerizie.length}`);
         }
-
-        // State filter handling removed
-
+    
         // Aggiorna il contatore delle visualizzate
         const visualizzateElement = document.getElementById('perizieVisualizzate');
         if (visualizzateElement) {
             visualizzateElement.textContent = filteredPerizie.length;
         }
-
+    
         // Carica la tabella con le perizie filtrate
         loadPerizieTable(filteredPerizie);
     }
@@ -2570,11 +2559,11 @@ async function deletePerizia(id) {
             confirmButtonText: 'Sì, elimina',
             cancelButtonText: 'Annulla'
         });
-
+        
         if (confirmation.isConfirmed) {
             await deletePerizieByIds([id]);
         }
-    } else {
+        } else {
         if (confirm(`Sei sicuro di voler eliminare la perizia ${id}?`)) {
             await deletePerizieByIds([id]);
         }
@@ -2590,7 +2579,7 @@ async function deleteSelectedPerizie() {
     if (selectedCheckboxes.length === 0) return;
 
     const ids = Array.from(selectedCheckboxes).map(checkbox => checkbox.getAttribute('data-id'));
-
+    
     // Confirm deletion
     if (window.Swal) {
         const confirmation = await Swal.fire({
@@ -2603,11 +2592,11 @@ async function deleteSelectedPerizie() {
             confirmButtonText: 'Sì, elimina',
             cancelButtonText: 'Annulla'
         });
-
+        
         if (confirmation.isConfirmed) {
             await window.deletePerizieByIds(ids);
         }
-    } else {
+        } else {
         if (confirm(`Sei sicuro di voler eliminare ${ids.length} perizie?`)) {
             await deletePerizieByIds(ids);
         }
@@ -2615,144 +2604,6 @@ async function deleteSelectedPerizie() {
 }
 
 // Function to assign selected perizie to an operator
-async function assignSelectedPerizie() {
-    // Verifica permessi amministratore
-    if (!checkAdminPermission()) return;
-
-    const selectedCheckboxes = document.querySelectorAll('.inspection-select:checked');
-    if (selectedCheckboxes.length === 0) {
-        if (window.Swal) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Nessuna selezione',
-                text: 'Seleziona almeno una perizia da assegnare'
-            });
-        }
-        return;
-    }
-
-    // Raccogliere gli ID delle perizie selezionate
-    const ids = Array.from(selectedCheckboxes)
-        .map(checkbox => checkbox.getAttribute('data-id'));
-
-    if (ids.length === 0) {
-        if (window.Swal) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Impossibile procedere',
-                text: 'Nessuna perizia selezionata'
-            });
-        }
-        return;
-    }
-
-
-    try {
-        // Recupera la lista degli operatori
-        const operatori = await inviaRichiesta("GET", "/api/users");
-        const operatoriAttivi = operatori.filter(op => op.role !== 'admin');
-
-        if (!operatoriAttivi.length) {
-            if (window.Swal) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Errore',
-                    text: 'Nessun operatore disponibile per l\'assegnazione'
-                });
-            }
-            return;
-        }
-
-        // Crea le opzioni per il dropdown degli operatori
-        const operatoriOptions = operatoriAttivi.map(op =>
-            `<option value="${op.username}">${op.firstName || ''} ${op.lastName || ''} (${op.username})</option>`
-        ).join('');
-
-        // Mostra dialog per selezionare l'operatore
-        if (window.Swal) {
-            const result = await Swal.fire({
-                title: 'Assegna Perizie',
-                html: `
-                    <p>Seleziona l'operatore a cui assegnare ${ids.length} perizie:</p>
-                    <select id="operatorDropdown" class="form-select">
-                        <option value="">-- Seleziona un operatore --</option>
-                        ${operatoriOptions}
-                    </select>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'Assegna',
-                cancelButtonText: 'Annulla',
-                preConfirm: () => {
-                    const operatorId = document.getElementById('operatorDropdown').value;
-                    if (!operatorId) {
-                        Swal.showValidationMessage('Devi selezionare un operatore');
-                        return false;
-                    }
-                    return operatorId;
-                }
-            });
-
-            if (result.isConfirmed && result.value) {
-                const operatoreId = result.value;
-                const operatore = operatori.find(op => op.username === operatoreId);
-
-                // Mostra il loader
-                Swal.fire({
-                    title: 'Assegnazione in corso...',
-                    html: 'Attendere prego',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                // Prepara i dati per l'aggiornamento
-                const updateData = {
-                    operatoreId: operatore.username,
-                    operatore: `${operatore.firstName || ''} ${operatore.lastName || ''}`.trim() || operatore.username
-                };
-
-                // Esegui le chiamate API per aggiornare ogni perizia
-                const updatePromises = ids.map(id =>
-                    inviaRichiesta("PATCH", `/api/perizie/${id}`, updateData)
-                );
-
-                // Attendi che tutte le chiamate siano completate
-                await Promise.all(updatePromises);
-
-                // Aggiorna i dati locali
-                if (window.perizie) {
-                    ids.forEach(id => {
-                        const perizia = window.perizie.find(p => p.id === id);
-                        if (perizia) {
-                            perizia.operatoreId = updateData.operatoreId;
-                            perizia.operatore = updateData.operatore;
-                        }
-                    });
-                }
-
-                // Ricarica i dati e l'interfaccia
-                await loadPerizie();
-                loadPerizieTable();
-                updatePerizieCounts();
-
-                // Mostra messaggio di successo
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Assegnazione completata',
-                    text: `${ids.length} perizie assegnate con successo a ${updateData.operatore}`
-                });
-            }
-        }
-    } catch (error) {
-        console.error("Errore nell'assegnazione delle perizie:", error);
-        Swal.fire({
-                    icon: 'success',
-                    title: 'Assegnazione completata',
-                    text: `${ids.length} perizie assegnate con successo a ${updateData.operatore}`
-                });
-    }
-}
 
 // Function to update a perizia
 // Function to update a perizia
@@ -3077,28 +2928,37 @@ async function deletePerizieByIds(ids) {
 
         console.log("Tentativo di eliminazione delle perizie con ID:", ids);
 
+        // Show loading indicator
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Eliminazione in corso...',
+                text: 'Attendere prego',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+
+        // Make the API request to delete the perizie
         const response = await inviaRichiesta("DELETE", "/api/perizie", { ids });
 
         console.log("Risposta eliminazione:", response);
 
-        if (response && response.success) {
-            // Reload perizie after deletion
-            await loadPerizie();
-            loadPerizieTable();
-            updatePerizieCounts();
+        // Reload perizie after deletion
+        await loadPerizie();
+        loadPerizieTable();
+        updatePerizieCounts();
 
-            if (window.Swal) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Eliminazione completata',
-                    text: 'Perizie eliminate con successo',
-                    confirmButtonColor: '#3085d6'
-                });
-            } else {
-                alert('Perizie eliminate con successo');
-            }
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Eliminazione completata',
+                text: 'Perizie eliminate con successo',
+                confirmButtonColor: '#3085d6'
+            });
         } else {
-            throw new Error("La risposta dal server non indica successo");
+            alert('Perizie eliminate con successo');
         }
     } catch (error) {
         console.error("Errore nell'eliminazione delle perizie:", error);
@@ -3115,17 +2975,36 @@ async function deletePerizieByIds(ids) {
         }
     }
 }
-
-// Function to delete a single perizia (corrected version)
+// Function to delete a single perizia
 async function deletePerizia(id) {
-    // Check admin permissions first
-    if (!checkAdminPermission()) return;
-
-    console.log("Tentativo di eliminare la perizia con ID:", id);
+    if (!id) {
+        console.error("ID perizia mancante");
+        return;
+    }
+    
+    console.log("Tentativo di eliminare perizia:", id);
+    const userData = JSON.parse(localStorage.getItem("currentUser"));
+    let permesso = userData && userData.role === 'admin';
+    
+    // Check admin permissions
+    if (!permesso) {
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Permesso negato',
+                text: 'Solo gli amministratori possono eliminare perizie'
+            });
+        } else {
+            alert('Solo gli amministratori possono eliminare perizie');
+        }
+        return;
+    }
 
     // Confirm deletion
+    let userConfirmed = false;
+    
     if (window.Swal) {
-        const confirmation = await Swal.fire({
+        const result = await Swal.fire({
             title: 'Conferma eliminazione',
             text: `Sei sicuro di voler eliminare la perizia ${id}?`,
             icon: 'warning',
@@ -3135,34 +3014,126 @@ async function deletePerizia(id) {
             confirmButtonText: 'Sì, elimina',
             cancelButtonText: 'Annulla'
         });
-
-        if (confirmation.isConfirmed) {
-            await deletePerizieByIds([id]);
-        }
+        
+        userConfirmed = result.isConfirmed;
     } else {
-        if (confirm(`Sei sicuro di voler eliminare la perizia ${id}?`)) {
-            await deletePerizieByIds([id]);
+        userConfirmed = confirm(`Sei sicuro di voler eliminare la perizia ${id}?`);
+    }
+    
+    if (!userConfirmed) {
+        return;
+    }
+    
+    try {
+        // Show loading indicator
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Eliminazione in corso...',
+                html: 'Attendere prego',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+        }
+        
+        // Direct fetch call to ensure correct format
+        const response = await fetch(`/api/perizie/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Server error: ${response.status} - ${errorText}`);
+            throw new Error(`Errore server: ${response.status} ${response.statusText}`);
+        }
+        
+        console.log(`Perizia ${id} eliminata con successo`);
+        
+        // Reload perizie
+        await loadPerizie();
+        loadPerizieTable();
+        updatePerizieCounts();
+        
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Eliminazione completata',
+                text: `Perizia ${id} eliminata con successo`
+            });
+        } else {
+            alert(`Perizia ${id} eliminata con successo`);
+        }
+    } catch (error) {
+        console.error("Errore nell'eliminazione della perizia:", error);
+        
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Errore',
+                text: `Impossibile eliminare la perizia: ${error.message}`
+            });
+        } else {
+            alert(`Impossibile eliminare la perizia: ${error.message}`);
         }
     }
 }
 
-// Function to delete selected perizie (corrected version)
-async function deleteSelectedPerizie() {
-    // Check admin permissions first
-    if (!checkAdminPermission()) return;
+    // Funzione per aggiornare i contatori delle perizie
+    function updatePerizieCounts() {
+        if (!window.perizie) return;
 
-    const selectedCheckboxes = document.querySelectorAll('.inspection-select:checked');
-    if (selectedCheckboxes.length === 0) {
-        console.log("Nessuna perizia selezionata per l'eliminazione");
+        const totalElement = document.getElementById('perizieTotali');
+        const totalFooterElement = document.getElementById('perizieTotaliFooter');
+        const visualizzateElement = document.getElementById('perizieVisualizzate');
+
+        if (totalElement) totalElement.textContent = window.perizie.length;
+        if (totalFooterElement) totalFooterElement.textContent = window.perizie.length;
+        if (visualizzateElement) visualizzateElement.textContent = window.perizie.length;
+    }
+// Simple direct function to delete multiple perizie
+async function deleteSelectedPerizie() {
+    // Check admin permissions
+    if (!isUserAdmin()) {
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Permesso negato',
+                text: 'Solo gli amministratori possono eliminare perizie'
+            });
+        } else {
+            alert('Solo gli amministratori possono eliminare perizie');
+        }
         return;
     }
-
+    
+    // Get selected checkboxes
+    const selectedCheckboxes = document.querySelectorAll('.inspection-select:checked');
+    
+    if (selectedCheckboxes.length === 0) {
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Attenzione',
+                text: 'Nessuna perizia selezionata'
+            });
+        } else {
+            alert('Nessuna perizia selezionata');
+        }
+        return;
+    }
+    
+    // Extract IDs
     const ids = Array.from(selectedCheckboxes).map(checkbox => checkbox.getAttribute('data-id'));
+    
     console.log("Perizie selezionate per l'eliminazione:", ids);
-
+    
     // Confirm deletion
+    let userConfirmed = false;
+    
     if (window.Swal) {
-        const confirmation = await Swal.fire({
+        const result = await Swal.fire({
             title: 'Conferma eliminazione',
             text: `Sei sicuro di voler eliminare ${ids.length} perizie?`,
             icon: 'warning',
@@ -3172,13 +3143,169 @@ async function deleteSelectedPerizie() {
             confirmButtonText: 'Sì, elimina',
             cancelButtonText: 'Annulla'
         });
-
-        if (confirmation.isConfirmed) {
-            await deletePerizieByIds(ids);
-        }
+        
+        userConfirmed = result.isConfirmed;
     } else {
-        if (confirm(`Sei sicuro di voler eliminare ${ids.length} perizie?`)) {
-            await deletePerizieByIds(ids);
+        userConfirmed = confirm(`Sei sicuro di voler eliminare ${ids.length} perizie?`);
+    }
+    
+    if (!userConfirmed) {
+        return;
+    }
+    
+    try {
+        // Show loading indicator
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Eliminazione in corso...',
+                html: 'Attendere prego',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+        }
+        
+        // Direct DELETE request for bulk delete
+        const response = await fetch('/api/perizie', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ids })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Errore server: ${response.status} ${response.statusText}`);
+        }
+        
+        console.log(`${ids.length} perizie eliminate con successo`);
+        
+        // Reload perizie
+        await loadPerizie();
+        loadPerizieTable();
+        updatePerizieCounts();
+        
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Eliminazione completata',
+                text: `${ids.length} perizie eliminate con successo`
+            });
+        } else {
+            alert(`${ids.length} perizie eliminate con successo`);
+        }
+    } catch (error) {
+        console.error("Errore nell'eliminazione delle perizie:", error);
+        
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Errore',
+                text: `Impossibile eliminare le perizie: ${error.message}`
+            });
+        } else {
+            alert(`Impossibile eliminare le perizie: ${error.message}`);
+        }
+    }
+}
+
+// Function to delete selected perizie (corrected version)
+async function deleteSelectedPerizie() {
+    // Check if user is admin
+    if (!isUserAdmin()) {
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Permesso negato',
+                text: 'Questa operazione può essere eseguita solo da un amministratore'
+            });
+        } else {
+            alert('Permesso negato. Questa operazione può essere eseguita solo da un amministratore');
+        }
+        return;
+    }
+
+    // Get selected checkboxes
+    const selectedCheckboxes = document.querySelectorAll('.inspection-select:checked');
+    if (selectedCheckboxes.length === 0) {
+        console.log("Nessuna perizia selezionata per l'eliminazione");
+        return;
+    }
+
+    // Extract IDs from selected checkboxes
+    const ids = Array.from(selectedCheckboxes).map(checkbox => checkbox.getAttribute('data-id'));
+    console.log("Perizie selezionate per l'eliminazione:", ids);
+
+    // Confirm deletion
+    let confirmed = false;
+    if (window.Swal) {
+        const result = await Swal.fire({
+            title: 'Conferma eliminazione',
+            text: `Sei sicuro di voler eliminare ${ids.length} perizie?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sì, elimina',
+            cancelButtonText: 'Annulla'
+        });
+        confirmed = result.isConfirmed;
+    } else {
+        confirmed = confirm(`Sei sicuro di voler eliminare ${ids.length} perizie?`);
+    }
+
+    if (!confirmed) return;
+
+    try {
+        // Show loading indicator
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Eliminazione in corso...',
+                text: 'Attendere prego',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+
+        // Direct API call without going through another function
+        const response = await fetch('/api/perizie', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ids })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Errore server: ${response.status} ${response.statusText}`);
+        }
+        
+        // Reload perizie after deletion
+        await loadPerizie();
+        loadPerizieTable();
+        updatePerizieCounts();
+
+        // Show success message
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Eliminazione completata',
+                text: 'Perizie eliminate con successo'
+            });
+        } else {
+            alert('Perizie eliminate con successo');
+        }
+    } catch (error) {
+        console.error("Errore nell'eliminazione delle perizie:", error);
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Errore',
+                text: `Impossibile eliminare le perizie: ${error.message}`
+            });
+        } else {
+            alert(`Impossibile eliminare le perizie: ${error.message}`);
         }
     }
 }
